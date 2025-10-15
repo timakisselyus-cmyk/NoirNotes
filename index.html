@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoirNotes — твоё личное пространство</title>
+  <meta name="description" content="NoirNotes — уютный тёмный сервис: личные дневники, календарь событий и персонализация. Бесплатно 15 дней в месяц или Plus безлимит за $2/мес." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Дополнительные стили для акцентов и небольших анимаций */
+    :root{--bg:#0B0B0F;--card:#0F1724;--muted:#9AA1A6;--accent1:#22d3ee;--accent2:#7c3aed}
+    .neon{background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .glass{background:rgba(255,255,255,0.02);backdrop-filter:blur(6px)}
+    .pulse{animation:pulse 2.4s infinite}
+    @keyframes pulse{0%{opacity:0.9}50%{opacity:0.7}100%{opacity:0.9}}
+  </style>
+</head>
+<body class="bg-[color:var(--bg)] text-white antialiased">
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto flex items-center justify-between p-6">
+    <a href="#" class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,var(--accent1),var(--accent2));font-weight:700">NN</div>
+      <div>
+        <div class="font-semibold">NoirNotes</div>
+        <div class="text-xs text-gray-400">Дневник • Календарь • Профиль</div>
+      </div>
+    </a>
+    <nav class="flex items-center gap-4">
+      <a href="#features" class="text-sm text-gray-300 hover:text-white">Функции</a>
+      <a href="#plans" class="text-sm text-gray-300 hover:text-white">Тарифы</a>
+      <a href="#contacts" class="text-sm text-gray-300 hover:text-white">Контакты</a>
+      <a href="login.html" class="px-4 py-2 rounded-2xl border border-white/10 text-sm">Войти</a>
+<a href="register.html" class="inline-flex items-center gap-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] text-[#021016] px-4 py-2 rounded-2xl font-semibold">Регистрация</a>
+
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <main class="max-w-6xl mx-auto px-6">
+    <section class="grid lg:grid-cols-2 gap-10 items-center py-12">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">Твоё личное пространство для мыслей, дел и целей</h1>
+        <p class="mt-4 text-gray-300 max-w-xl">Веди дневник, планируй важные события и отмечай достижения — всё в одном уютном и современном интерфейсе. Бесплатно 15 дней в месяц или Plus безлимит за $2/мес.</p>
+
+        <div class="mt-8 flex items-center gap-4">
+          <a href="#register" class="inline-flex items-center gap-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] text-[#021016] px-5 py-3 rounded-2xl font-semibold shadow-lg">Начать бесплатно</a>
+          <a href="#login" class="px-5 py-3 rounded-2xl border border-white/6 text-sm">У меня есть аккаунт</a>
+        </div>
+
+        <div class="mt-8 grid grid-cols-2 gap-3 max-w-md">
+          <div class="glass p-4 rounded-xl">
+            <div class="text-sm text-gray-300">Подписка Plus</div>
+            <div class="font-semibold mt-1 neon">$2 / мес — экспорт, темы, напоминания</div>
+          </div>
+          <div class="glass p-4 rounded-xl">
+            <div class="text-sm text-gray-300">Приватность</div>
+            <div class="font-semibold mt-1">Данные защищены и остаются только у тебя</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: demo card + calendar preview trigger -->
+      <div class="relative">
+        <div class="rounded-2xl p-6 glass border border-white/6 shadow-2xl">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-[color:var(--accent1)] to-[color:var(--accent2)] flex items-center justify-center font-bold">NN</div>
+              <div>
+                <div class="text-sm font-semibold">Мой дневник</div>
+                <div class="text-xs text-gray-400">Последняя запись: сегодня</div>
+              </div>
+            </div>
+            <div class="text-xs text-gray-400">• • •</div>
+          </div>
+
+          <div class="mt-4">
+            <div class="h-40 rounded-xl bg-gradient-to-b from-black/40 to-transparent p-4 flex flex-col justify-between">
+              <div>
+                <div class="text-sm text-gray-300">Запись</div>
+                <div class="mt-2 font-medium">«Сегодня я сделал первый шаг к новой привычке — и это уже победа.»</div>
+              </div>
+              <div class="text-xs text-gray-400">Теги: привычки • утро</div>
+            </div>
+
+            <div class="mt-4 grid grid-cols-3 gap-3">
+              <div class="p-3 rounded-lg bg-white/3 text-center">
+                <div class="text-sm text-gray-300">Дневники</div>
+                <div class="font-semibold mt-1">2</div>
+              </div>
+              <div class="p-3 rounded-lg bg-white/3 text-center cursor-pointer" id="open-calendar-btn">
+                <div class="text-sm text-gray-300">Календарь</div>
+                <div class="font-semibold mt-1">3 события</div>
+              </div>
+              <div class="p-3 rounded-lg bg-white/3 text-center">
+                <div class="text-sm text-gray-300">План</div>
+                <div class="font-semibold mt-1">Еженедельный</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decorative neon blob -->
+        <div class="absolute -right-12 -bottom-8 opacity-60 hidden lg:block">
+          <svg width="220" height="220" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g" x1="0" x2="1">
+                <stop offset="0" stop-color="#22d3ee"/>
+                <stop offset="1" stop-color="#7c3aed"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="80" fill="url(#g)" opacity="0.08"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features / Detailed -->
+    <section id="features" class="py-10">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-2xl font-semibold">Подробно о проекте</h2>
+        <p class="mt-2 text-gray-300">NoirNotes объединяет ключевые инструменты для личной организации: дневники для мыслей, календарь для планов и профиль для персонализации. Ниже — подробное описание каждого элемента.</p>
+      </div>
+
+      <div class="mt-8 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto text-left">
+        <div class="p-6 glass rounded-xl">
+          <h3 class="font-semibold mb-2">✍️ Дневники</h3>
+          <p class="text-gray-300">Пиши записи любого объёма, добавляй теги, фото и ссылки. Можно создавать несколько дневников (например: "Личные", "Учёба", "Проекты"). Все записи приватны по умолчанию.</p>
+        </div>
+        <div class="p-6 glass rounded-xl">
+          <h3 class="font-semibold mb-2">📅 Календарь</h3>
+          <p class="text-gray-300">Календарь показывает месяцы и выделяет дни с событиями. Для каждого события можно задать время, напоминание и метку "важно". Календарь синхронизируется с записями — можно прикреплять заметку к дню.</p>
+        </div>
+        <div class="p-6 glass rounded-xl">
+          <h3 class="font-semibold mb-2">👤 Профиль</h3>
+          <p class="text-gray-300">Настрой имя, фото и тему оформления. Перед регистрацией можно загрузить аватар, а в настройках профиля — сменить тему, имя и личные данные.</p>
+        </div>
+      </div>
+
+      <!-- Extra details: how the calendar works -->
+      <div class="mt-10 max-w-4xl mx-auto">
+        <h4 class="text-xl font-semibold mb-3">Как работает календарь — подробно</h4>
+        <ul class="list-disc pl-5 text-gray-300 space-y-2">
+          <li><strong>Создание события:</strong> заголовок, дата/время, напоминание (email/push), пометка "важно", описание и привязка к записи дневника.</li>
+          <li><strong>Просмотр:</strong> месячный и недельный вид, быстрый список событий на сегодня, отметки важности.</li>
+          <li><strong>Напоминания:</strong> можно настроить одно или несколько напоминаний до события.</li>
+          <li><strong>Синхронизация:</strong> в будущих версиях — экспорт в iCal и синхронизация с Google Calendar (планируется).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Interactive mini-calendar modal & section -->
+    <section class="py-12">
+      <div class="max-w-4xl mx-auto text-center">
+        <h3 class="text-2xl font-semibold mb-4">Мини-календарь — пример</h3>
+        <p class="text-gray-300 mb-6">Нажми на день, чтобы добавить событие (в демонстрации данные сохраняются в localStorage)</p>
+
+        <div id="mini-calendar" class="inline-block bg-[#0F0F15] rounded-2xl p-6 shadow-lg"></div>
+
+        <div id="events-demo" class="mt-6 text-left max-w-2xl mx-auto"></div>
+      </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section id="plans" class="py-12">
+      <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-3xl font-semibold text-center mb-6">Планы подписки</h2>
+        <div class="grid md:grid-cols-2 gap-8">
+          <!-- Free -->
+          <div class="glass p-8 rounded-2xl border border-white/8">
+            <h3 class="text-2xl font-bold">Бесплатный — 15 дней / месяц</h3>
+            <p class="text-gray-300 mt-2">Все функции работают в течение 15 дней каждый месяц. После этого периода редактирование блокируется — остаётся только просмотр, чтобы не потерять данные.</p>
+            <ul class="mt-4 text-gray-300 space-y-2">
+              <li>✅ Дневники, записи и теги</li>
+              <li>✅ Полнофункциональный календарь в активный период</li>
+              <li>✅ Экспорт записей и темы (включены в активный период)</li>
+              <li>⏳ После 15 дней — режим только для чтения</li>
+            </ul>
+            <div class="mt-6">
+              <button id="start-free" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] text-[#021016] font-semibold">Попробовать бесплатно</button>
+            </div>
+          </div>
+
+          <!-- Plus -->
+          <div class="p-8 rounded-2xl bg-gradient-to-br from-[color:var(--accent1)]/10 to-[color:var(--accent2)]/15 border border-[color:var(--accent1)]/25 shadow-lg">
+            <h3 class="text-2xl font-bold neon">Plus — $2 / месяц</h3>
+            <p class="text-gray-300 mt-2">Безлимитный доступ ко всем функциям. Рекомендуется тем, кто использует NoirNotes ежедневно.</p>
+            <ul class="mt-4 text-gray-200 space-y-2">
+              <li>✅ Безлимитное использование</li>
+              <li>✅ Приоритетная поддержка</li>
+              <li>✅ Экспорт, темы и дополнительные настройки</li>
+              <li>✅ Резервные копии и экспорт (CSV/PDF)</li>
+            </ul>
+            <div class="mt-6">
+              <button id="buy-plus" class="px-6 py-3 rounded-2xl bg-white text-[#021016] font-semibold">Купить Plus</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-sm text-gray-400">Примечание: в бесплатном плане данные сохраняются — просто доступ к редактированию временно ограничивается по окончании активного периода.</div>
+      </div>
+    </section>
+
+    <!-- Why NoirNotes -->
+    <section class="py-12 bg-[#12121A]">
+      <div class="max-w-5xl mx-auto text-center py-10">
+        <h2 class="text-2xl font-semibold mb-4">Почему NoirNotes?</h2>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="p-6 bg-[#0F0F15] rounded-2xl">Современно и уютно — дизайн для спокойной работы с мыслями.</div>
+          <div class="p-6 bg-[#0F0F15] rounded-2xl">Приватно — настройки приватности и шифрование данных (планируется).</div>
+          <div class="p-6 bg-[#0F0F15] rounded-2xl">Лёгкость — начни за 1 минуту и пробуй функционал бесплатно.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contacts -->
+    <section id="contacts" class="py-12">
+      <div class="max-w-4xl mx-auto text-center">
+        <h2 class="text-2xl font-semibold mb-4">Контакты и поддержка</h2>
+        <p class="text-gray-300 mb-4">📩 Поддержка: <a href="mailto:support@noirnotes.app" class="text-[color:var(--accent1)]">support@noirnotes.app</a></p>
+        <p class="text-gray-300 mb-6">💬 Форма обратной связи доступна после регистрации — пока можно написать на почту.</p>
+
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="p-6 glass rounded-2xl text-left">
+            <h4 class="font-semibold">Как мы помогаем</h4>
+            <p class="text-gray-300 mt-2">Ответим на вопросы о тарифах, поможем восстановить доступ и примем пожелания по функционалу.</p>
+          </div>
+          <div class="p-6 glass rounded-2xl text-left">
+            <h4 class="font-semibold">Служба поддержки</h4>
+            <p class="text-gray-300 mt-2">Чат и форма обратной связи будут подключены в следующих релизах. Сейчас поддержка по почте.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-12">
+      <div class="max-w-4xl mx-auto">
+        <h3 class="text-2xl font-semibold mb-4">Частые вопросы</h3>
+        <details class="mb-3 bg-[#0F0F15] p-4 rounded-lg"><summary class="cursor-pointer">Что доступно в бесплатном плане?</summary><p class="mt-2 text-gray-300">Все функции работают в течение 15 дней в каждом месяце: дневники, календарь, экспорт и темы. После 15 дней редактирование блокируется — остаётся просмотр и экспорт ранее созданных данных.</p></details>
+        <details class="mb-3 bg-[#0F0F15] p-4 rounded-lg"><summary class="cursor-pointer">Можно ли переключиться на Plus позже?</summary><p class="mt-2 text-gray-300">Да, переход на Plus возможен в любой момент. При оплате доступ разблокируется сразу.</p></details>
+        <details class="mb-3 bg-[#0F0F15] p-4 rounded-lg"><summary class="cursor-pointer">Как оплачивать подписку?</summary><p class="mt-2 text-gray-300">Планируем интеграцию Stripe и других платёжных систем. Пока в демо — кнопка-заглушка.</p></details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/6 py-8 mt-12 text-center text-gray-400">
+    © 2025 NoirNotes — уютное пространство для твоих мыслей. <br />
+    <div class="mt-4 flex justify-center gap-6">
+      <a href="register.html" class="hover:text-[color:var(--accent1)]">Регистрация</a>
+<a href="login.html" class="hover:text-[color:var(--accent1)]">Вход</a>
+
+    </div>
+  </footer>
+
+  <!-- Scripts: mini-calendar demo, subscription demo, interactivity -->
+  <script>
+    // Simple mini-calendar demo (renders current month, allows adding events saved to localStorage)
+    (function(){
+      const container = document.getElementById('mini-calendar');
+      const eventsDemo = document.getElementById('events-demo');
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = today.getMonth();
+
+      function firstDayOfMonth(y,m){return new Date(y,m,1).getDay()}
+      function daysInMonth(y,m){return new Date(y,m+1,0).getDate()}
+
+      function render(){
+        const first = new Date(year,month,1);
+        const startWeekDay = (first.getDay()+6)%7; // make Monday=0
+        const days = daysInMonth(year,month);
+        let html = '<div class="text-gray-300 mb-3"><strong>'+today.toLocaleString('ru-RU',{month:'long'})+' '+year+'</strong></div>';
+        html += '<div class="grid grid-cols-7 gap-2">';
+        ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(d=>html += '<div class="text-xs text-gray-500 text-center">'+d+'</div>');
+        for(let i=0;i<startWeekDay;i++) html += '<div></div>';
+        for(let d=1; d<=days; d++){
+          const key = 'nn_events_'+year+'_'+(month+1)+'_'+d;
+          const ev = localStorage.getItem(key);
+          const has = ev ? true : false;
+          html += '<div class="p-2 rounded-lg cursor-pointer '+(has? 'bg-[rgba(34,211,238,0.12)]':'hover:bg-white/5')+'" data-day="'+d+'">'
+               +'<div class="text-sm">'+d+'</div>'
+               +(has? '<div class="text-xs text-[color:var(--accent1)] mt-1">●</div>':'' )
+               +'</div>'
+        }
+        html += '</div>';
+        container.innerHTML = html;
+
+        // attach click
+        container.querySelectorAll('[data-day]').forEach(el=>{
+          el.addEventListener('click', ()=>{
+            const d = el.getAttribute('data-day');
+            const key = 'nn_events_'+year+'_'+(month+1)+'_'+d;
+            const text = prompt('Добавить событие на '+d+' '+ (month+1)+': (в демонстрации сохраняется локально)');
+            if(text){localStorage.setItem(key,text); render(); renderEventsList();}
+          })
+        })
+      }
+
+      function renderEventsList(){
+        const list = [];
+        for(let d=1; d<=daysInMonth(year,month); d++){
+          const key = 'nn_events_'+year+'_'+(month+1)+'_'+d;
+          const ev = localStorage.getItem(key);
+          if(ev) list.push({d,ev});
+        }
+        if(list.length===0){eventsDemo.innerHTML = '<div class="text-gray-400">Событий нет — добавь в календаре</div>';return}
+        let html = '<ul class="space-y-2">';
+        list.forEach(it=> html += '<li class="bg-[#0F0F15] p-3 rounded-lg"><strong>'+it.d+'</strong> — '+it.ev+'</li>');
+        html += '</ul>';
+        eventsDemo.innerHTML = html;
+      }
+
+      render(); renderEventsList();
+    })();
+
+    // Subscription demo logic (localStorage simulate active/free/plus)
+    (function(){
+      const startFree = document.getElementById('start-free');
+      const buyPlus = document.getElementById('buy-plus');
+
+      function getState(){
+        // state stored as {plan:'free'|'plus', freeStart:timestamp}
+        return JSON.parse(localStorage.getItem('nn_sub')||'null');
+      }
+      function setState(s){localStorage.setItem('nn_sub', JSON.stringify(s)); updateUI();}
+
+      function updateUI(){
+        const st = getState();
+        // nothing fancy: show alerts
+        if(!st){ return }
+        if(st.plan==='plus'){console.log('План: PLUS — безлимит')}
+        if(st.plan==='free'){
+          const now = Date.now();
+          const passed = Math.floor((now - st.freeStart)/(1000*60*60*24));
+          const daysLeft = 15 - passed;
+          if(daysLeft>0) console.log('Free active, дней осталось: '+daysLeft);
+          else console.log('Free период закончился — режим только для чтения');
+        }
+      }
+
+      startFree.addEventListener('click', ()=>{
+        const now = Date.now();
+        setState({plan:'free', freeStart: now});
+        alert('Бесплатный период активирован — 15 дней функций.');
+      });
+      buyPlus.addEventListener('click', ()=>{
+        setState({plan:'plus', since: Date.now()});
+        alert('Поздравляем — у вас Plus! (демо)');
+      });
+
+      updateUI();
+    })();
+
+    // open calendar quick link
+    document.getElementById('open-calendar-btn')?.addEventListener('click', ()=>{
+      document.getElementById('mini-calendar')?.scrollIntoView({behavior:'smooth'});
+      document.getElementById('mini-calendar')?.classList.add('pulse');
+      setTimeout(()=>document.getElementById('mini-calendar')?.classList.remove('pulse'),2000);
+    });
+  </script>
+</body>
+</html>

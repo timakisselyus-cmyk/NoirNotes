@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>NoirNotes — Профиль</title>
+  <meta name="description" content="NoirNotes — дневники, календарь, финансы и профиль. SPA." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{
+      --bg:#0B0B0F; --card:#0F1724; --muted:#9AA1A6;
+      --accent1:#22d3ee; --accent2:#7c3aed;
+      --light-bg:#f7f7fb; --light-text:#0b0b0f;
+    }
+    html,body{height:100%}
+    body{background:var(--bg);color:#fff;transition:background .28s,color .28s;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+    .glass{background:rgba(255,255,255,0.03);backdrop-filter:blur(6px)}
+    .muted{color:var(--muted)}
+    .neon-text{background:linear-gradient(90deg,var(--accent1),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .card-shadow{box-shadow:0 6px 30px rgba(14,15,18,0.6)}
+    .loader-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(2,6,23,0.9),rgba(2,6,23,0.95));z-index:60}
+    @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    .fade-in { animation: fadeIn .22s ease both; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: translateY(0) } }
+    .scale-in { animation: scaleIn .16s ease both; transform-origin:center; }
+    @keyframes scaleIn { from { transform: scale(.96); opacity:0 } to { transform: scale(1); opacity:1 } }
+    .results-dropdown{position:absolute;z-index:30;min-width:320px;max-height:320px;overflow:auto}
+    .theme-transition{transition: background .25s, color .25s}
+    .toast { position: fixed; right: 24px; bottom: 24px; z-index: 80; min-width: 220px; }
+    .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.06); }
+    .trash { opacity: .9; transition: transform .12s ease, opacity .12s ease; }
+    .trash:hover { transform: translateY(-3px); opacity: 1; }
+    .hidden-el { display:none !important; }
+  </style>
+</head>
+<body class="antialiased min-h-screen theme-transition">
+
+  <!-- Loader -->
+  <div id="loader" class="loader-wrap">
+    <div class="flex flex-col items-center gap-4">
+      <div class="w-20 h-20 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,var(--accent1),var(--accent2));">
+        <div class="font-bold text-[#021016]">NN</div>
+      </div>
+      <div class="text-center">
+        <div class="text-xl font-semibold">NoirNotes</div>
+        <div class="muted mt-1">Загрузка...</div>
+      </div>
+      <div style="width:44px;height:44px;border:4px solid rgba(255,255,255,0.06);border-top-color:var(--accent1);border-radius:50%;animation:spin 1s linear infinite"></div>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="hidden max-w-7xl mx-auto p-4">
+
+    <!-- Header -->
+    <header class="flex items-center justify-between py-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center card-shadow" style="background:linear-gradient(135deg,var(--accent1),var(--accent2));">
+          <div class="font-bold text-[#021016]">NN</div>
+        </div>
+        <div>
+          <div class="font-semibold text-lg">NoirNotes</div>
+          <div class="text-xs muted">Дневники • Календарь • Финансы</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 relative">
+        <!-- Search -->
+        <div class="hidden sm:flex items-center bg-[#0F1724] rounded-full px-3 py-1 gap-3 glass relative">
+          <input id="quickSearch" placeholder="Поиск заметок, событий, дневников..." class="bg-transparent outline-none text-sm w-80" />
+          <button id="searchBtn" class="px-3 py-1 rounded-lg bg-white/5 text-sm">Поиск</button>
+
+          <!-- results -->
+          <div id="searchResults" class="results-dropdown hidden mt-2 right-0 bg-[#0F1724] rounded-lg glass p-2 border border-white/6"></div>
+        </div>
+
+        <!-- subscription badge -->
+        <div id="sub-badge" class="px-3 py-1 rounded-full text-sm bg-white/5 muted">Free</div>
+
+        <!-- profile -->
+        <div class="flex items-center gap-3">
+          <img id="top-avatar" src="https://via.placeholder.com/40" alt="avatar" class="w-10 h-10 rounded-full border border-white/6 object-cover" />
+          <div class="text-right">
+            <div id="top-name" class="font-medium">Гость</div>
+            <div class="text-xs muted">Аккаунт</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-12 gap-6">
+
+      <!-- Sidebar -->
+      <aside class="col-span-12 md:col-span-3 lg:col-span-2 glass p-4 rounded-2xl card-shadow">
+        <div class="flex flex-col items-center mb-6">
+          <div class="w-28 h-28 rounded-xl overflow-hidden border border-white/6 mb-3">
+            <img id="profileAvatar" src="https://via.placeholder.com/160" alt="avatar" class="w-full h-full object-cover" />
+          </div>
+          <div id="profileName" class="font-semibold text-lg">Гость</div>
+          <div class="text-xs muted mt-1" id="profilePlan">План: Free</div>
+        </div>
+
+        <nav class="mt-4">
+          <ul class="space-y-2 text-sm">
+            <li><button data-tab="home" class="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 tab-btn">🏠 <span>Главная</span></button></li>
+            <li><button data-tab="notes" class="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 tab-btn">✍️ <span>Дневники</span></button></li>
+            <li><button data-tab="calendar" class="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 tab-btn">📅 <span>Календарь</span></button></li>
+            <li><button data-tab="finance" class="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 tab-btn">💰 <span>Финансы</span></button></li>
+            <li><button data-tab="settings" class="w-full text-left flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 tab-btn">⚙️ <span>Профиль</span></button></li>
+          </ul>
+        </nav>
+
+        <div class="mt-6 pt-4 border-t border-white/5 text-center text-sm muted">
+          <div>NoirNotes</div>
+          <div class="mt-2">© 2025</div>
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <section class="col-span-12 md:col-span-9 lg:col-span-10">
+
+        <!-- HOME -->
+        <div id="tab-home" class="tab-content">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="glass p-5 rounded-2xl">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="text-sm muted">Последняя запись</div>
+                  <div id="home-last-title" class="font-semibold mt-2">—</div>
+                </div>
+                <div class="text-xs muted" id="home-last-date">—</div>
+              </div>
+              <div id="home-last-body" class="text-sm muted mt-3">—</div>
+            </div>
+
+            <div class="glass p-5 rounded-2xl">
+              <div class="text-sm muted">События</div>
+              <div class="font-semibold mt-2" id="home-events-count">0 запланировано</div>
+              <div class="mt-3" id="home-events-list"></div>
+            </div>
+
+            <div class="glass p-5 rounded-2xl">
+              <div class="text-sm muted">Финансы (пример)</div>
+              <div class="font-semibold mt-2" id="home-fin-sum">0 KZT</div>
+              <div class="mt-3 text-sm muted" id="home-fin-details">—</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass p-4 rounded-2xl">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-semibold">Последние записи</h3>
+                <button id="openNotesBtn" class="text-sm muted hover:text-white">Открыть все</button>
+              </div>
+              <div id="recent-notes" class="space-y-3"></div>
+            </div>
+
+            <div class="glass p-4 rounded-2xl">
+              <h3 class="font-semibold mb-3">Ближайшие события</h3>
+              <div id="upcoming-events" class="space-y-2"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTES -->
+        <div id="tab-notes" class="tab-content hidden">
+          <div class="flex flex-col lg:flex-row gap-6">
+            <div class="flex-1">
+              <div class="glass p-4 rounded-2xl mb-4">
+                <div class="flex gap-3 items-start">
+                  <input id="note-title" placeholder="Заголовок" class="flex-1 bg-transparent border-b border-white/8 px-2 py-2 outline-none" />
+                  <button id="undo-note" class="px-2 py-2 bg-white/5 rounded-lg" title="Отменить (Ctrl+Z)">⎌</button>
+                  <button id="redo-note" class="px-2 py-2 bg-white/5 rounded-lg" title="Вернуть (Ctrl+Y)">↻</button>
+                  <button id="save-note" class="px-3 py-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] rounded-xl text-[#021016] font-semibold">Сохранить</button>
+                </div>
+                <textarea id="note-body" rows="8" class="mt-3 w-full bg-transparent outline-none" placeholder="Напиши что-то..."></textarea>
+                <div class="mt-3 flex items-center gap-3">
+                  <input id="note-image" type="file" accept="image/*" class="hidden" />
+                  <button id="chooseNoteImage" class="px-3 py-2 bg-white/5 rounded-lg">Добавить изображение</button>
+                  <img id="note-image-preview" src="" alt="" style="max-width:80px;max-height:80px;display:none;border-radius:8px;" />
+                </div>
+              </div>
+
+              <div id="notes-list" class="grid gap-3"></div>
+            </div>
+
+            <aside class="w-full lg:w-80 glass p-4 rounded-2xl">
+              <h4 class="font-semibold mb-3">Фильтры</h4>
+              <input id="tagsFilter" placeholder="Фильтр по тегам (через запятую)" class="w-full bg-transparent border border-white/6 px-3 py-2 rounded-lg" />
+              <div class="mt-4 text-sm muted">Подсказка: теги вводятся через запятую в тексте заметки (демо).</div>
+            </aside>
+          </div>
+        </div>
+
+        <!-- CALENDAR -->
+        <div id="tab-calendar" class="tab-content hidden">
+          <div class="glass p-4 rounded-2xl mb-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold">Календарь</h3>
+              <div>
+                <button id="add-event-btn" class="px-3 py-2 bg-white/5 rounded-lg">Добавить событие</button>
+              </div>
+            </div>
+            <div id="calendar-wrap" class="mt-4 grid grid-cols-7 gap-2 text-xs text-gray-400"></div>
+          </div>
+
+          <div id="calendar-events-list" class="space-y-3"></div>
+        </div>
+
+        <!-- FINANCE -->
+        <div id="tab-finance" class="tab-content hidden">
+          <div class="glass p-4 rounded-2xl">
+            <h3 class="font-semibold">Финансы — быстрый ввод</h3>
+            <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input id="fin-name" placeholder="Название" class="bg-transparent border border-white/6 px-3 py-2 rounded-lg" />
+              <input id="fin-amount" type="number" placeholder="Сумма" class="bg-transparent border border-white/6 px-3 py-2 rounded-lg" />
+              <select id="fin-currency" class="bg-transparent border border-white/6 px-3 py-2 rounded-lg">
+                <option value="KZT">KZT</option><option value="USD">USD</option><option value="RUB">RUB</option>
+              </select>
+            </div>
+            <div class="mt-3">
+              <button id="add-fin" class="px-4 py-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] rounded-xl text-[#021016] font-semibold">Добавить</button>
+            </div>
+
+            <div class="mt-4" id="fin-totals"></div>
+          </div>
+
+          <div id="fin-list" class="mt-4 space-y-3"></div>
+        </div>
+
+        <!-- SETTINGS -->
+        <div id="tab-settings" class="tab-content hidden">
+          <div class="glass p-6 rounded-2xl">
+            <h3 class="font-semibold mb-3">Профиль</h3>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="text-sm muted">Имя</label>
+                <input id="set-name" class="w-full bg-transparent border-b border-white/8 px-2 py-2" />
+              </div>
+              <div>
+                <label class="text-sm muted">Email</label>
+                <input id="set-email" class="w-full bg-transparent border-b border-white/8 px-2 py-2" />
+              </div>
+              <div>
+                <label class="text-sm muted">Пароль</label>
+                <input id="set-password" class="w-full bg-transparent border-b border-white/8 px-2 py-2" />
+              </div>
+              <div>
+                <label class="text-sm muted">Аватар</label>
+                <div class="flex items-center gap-3 mt-2">
+                  <div class="w-16 h-16 rounded-full overflow-hidden border border-white/6 relative" id="avatarPreviewWrap">
+                    <img id="avatarPreviewImg" src="https://via.placeholder.com/80" class="w-full h-full object-cover transition-opacity duration-300"/>
+                    <button id="removeAvatar" title="Удалить фото" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.5);color:#fff;border:none;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;opacity:0.8;" class="hover:opacity-100">✕</button>
+                  </div>
+                  <div>
+                    <input id="avatarFile" type="file" accept="image/*" class="hidden" />
+                    <button id="chooseAvatar" class="px-3 py-2 bg-white/5 rounded-lg">Выбрать фото</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <label class="text-sm muted">Тема</label>
+              <div class="flex gap-2 mt-2">
+                <button data-theme="dark" class="theme-btn px-3 py-2 bg-white/5 rounded-lg">Тёмная</button>
+                <button data-theme="neon" class="theme-btn px-3 py-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] text-[#021016] rounded-lg">Неоновая</button>
+                <button data-theme="light" class="theme-btn px-3 py-2 bg-white text-[#021016] rounded-lg">Светлая</button>
+              </div>
+            </div>
+
+            <div class="mt-6 flex gap-3">
+              <button id="saveProfile" class="px-4 py-2 bg-gradient-to-r from-[color:var(--accent1)] to-[color:var(--accent2)] rounded-xl text-[#021016] font-semibold">Сохранить профиль</button>
+              <button id="downgrade" class="px-4 py-2 bg-white/5 rounded-xl">Удалить аккаунт</button>
+              <button id="openLogoutModal" class="px-4 py-2 bg-red-600 rounded-xl text-white">Выйти</button>
+            </div>
+
+            <div class="mt-6 text-sm muted">Поддержка: <a href="mailto:support@noirnotes.app" class="text-[color:var(--accent1)]">support@noirnotes.app</a></div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- --- Modals for delete confirmations (3 separate) --- -->
+
+  <!-- Delete Note Modal -->
+  <div id="deleteNoteModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-md p-6 rounded-2xl glass scale-in">
+      <h3 class="text-lg font-semibold">Удалить запись?</h3>
+      <p class="muted mt-2">Это действие удалит запись навсегда (в демо — удаляется в localStorage). Вы уверены?</p>
+      <div class="mt-4 flex gap-3 justify-end">
+        <button id="cancelDeleteNote" class="px-4 py-2 btn-ghost rounded-lg">Отмена</button>
+        <button id="confirmDeleteNote" class="px-4 py-2 bg-red-600 rounded-lg text-white">Да, удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Finance Modal -->
+  <div id="deleteFinModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-md p-6 rounded-2xl glass scale-in">
+      <h3 class="text-lg font-semibold">Удалить финансовую запись?</h3>
+      <p class="muted mt-2">Элемент будет удалён и итог автоматически пересчитается. Продолжить?</p>
+      <div class="mt-4 flex gap-3 justify-end">
+        <button id="cancelDeleteFin" class="px-4 py-2 btn-ghost rounded-lg">Отмена</button>
+        <button id="confirmDeleteFin" class="px-4 py-2 bg-red-600 rounded-lg text-white">Да, удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Event Modal -->
+  <div id="deleteEventModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+    <div class="relative w-full max-w-md p-6 rounded-2xl glass scale-in">
+      <h3 class="text-lg font-semibold">Удалить событие?</h3>
+      <p class="muted mt-2">Это удалит событие из календаря. Вы уверены?</p>
+      <div class="mt-4 flex gap-3 justify-end">
+        <button id="cancelDeleteEvent" class="px-4 py-2 btn-ghost rounded-lg">Отмена</button>
+        <button id="confirmDeleteEvent" class="px-4 py-2 bg-red-600 rounded-lg text-white">Да, удалить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logout Modal -->
+  <div id="logoutModal" class="fixed inset-0 hidden items-center justify-center z-50">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative w-full max-w-md p-6 rounded-2xl glass scale-in">
+      <h3 class="text-lg font-semibold">Выйти из аккаунта?</h3>
+      <p class="muted mt-2">При выходе сессия завершится. Данные останутся в браузере.</p>
+      <div class="mt-4 flex gap-3 justify-end">
+        <button id="cancelLogout" class="px-4 py-2 btn-ghost rounded-lg">Отмена</button>
+        <button id="confirmLogout" class="px-4 py-2 bg-red-600 rounded-lg text-white">Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast area -->
+  <div id="toastArea" class="toast"></div>
+
+<script>
+/* ==================== Session & Loader ==================== */
+(function(){
+  const auth = localStorage.getItem('nn_auth');
+  if(!auth){
+    window.location.href = 'login.html';
+    return;
+  }
+})();
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  setTimeout(()=>{
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    applyTheme(getSavedTheme());
+  }, 220);
+});
+
+/* ==================== State ==================== */
+const state = {
+  user: JSON.parse(localStorage.getItem('nn_user') || 'null') || {name:'Гость', email:'', password:'', avatar:null},
+  sub: JSON.parse(localStorage.getItem('nn_sub') || 'null'),
+  notes: JSON.parse(localStorage.getItem('nn_notes') || '[]'),
+  events: JSON.parse(localStorage.getItem('nn_events_all') || '[]'),
+  finances: JSON.parse(localStorage.getItem('nn_fin') || '[]'),
+  rates: JSON.parse(localStorage.getItem('nn_rates') || JSON.stringify({USD:480,RUB:5.5}))
+};
+
+/* ==================== UI Init ==================== */
+function initUser(){
+  document.getElementById('top-name').textContent = state.user.name || 'Гость';
+  document.getElementById('profileName').textContent = state.user.name || 'Гость';
+  if(state.user.avatar){
+    document.getElementById('top-avatar').src = state.user.avatar;
+    document.getElementById('profileAvatar').src = state.user.avatar;
+    document.getElementById('avatarPreviewImg').src = state.user.avatar;
+  }
+  document.getElementById('set-name').value = state.user.name || '';
+  document.getElementById('set-email').value = state.user.email || '';
+  document.getElementById('set-password').value = state.user.password || '';
+
+  const planEl = document.getElementById('profilePlan');
+  const subBadge = document.getElementById('sub-badge');
+  if(state.sub && state.sub.plan==='plus'){ planEl.textContent='План: Plus'; subBadge.textContent='Plus'; }
+  else if(state.sub && state.sub.plan==='free'){ planEl.textContent='План: Бесплатный'; subBadge.textContent='Free'; }
+  else { planEl.textContent='План: Нет'; subBadge.textContent=''; }
+}
+
+function renderSettings(){}
+initUser();
+
+/* ==================== Tabs ==================== */
+function switchTo(tab){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('bg-white/5'));
+  const btn = document.querySelector('[data-tab="'+tab+'"]'); if(btn) btn.classList.add('bg-white/5');
+  const el = document.getElementById('tab-'+tab); if(el) el.classList.remove('hidden');
+
+  if(tab==='home') renderHome();
+  if(tab==='notes') renderNotes();
+  if(tab==='calendar') renderCalendar();
+  if(tab==='finance') renderFinance();
+  if(tab==='settings') renderSettings();
+}
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click', ()=> switchTo(b.getAttribute('data-tab')) ));
+switchTo('home');
+
+/* ==================== Notes: save/load/render + delete modal ==================== */
+const notesListEl = document.getElementById('notes-list');
+const noteTitle = document.getElementById('note-title');
+const noteBody = document.getElementById('note-body');
+let noteToDeleteId = null;
+
+document.getElementById('save-note').addEventListener('click', ()=>{
+  const t = (noteTitle.value||'Без названия').trim();
+  const b = (noteBody.value||'').trim();
+  const img = document.getElementById('note-image-preview').src || '';
+  if(!b){ alert('Напиши текст заметки'); return; }
+  const note = {id:Date.now(),title:t,body:b,created:new Date().toISOString(), image: img && img.startsWith('data:') ? img : ''};
+  state.notes.unshift(note); localStorage.setItem('nn_notes', JSON.stringify(state.notes));
+  noteTitle.value=''; noteBody.value='';
+  document.getElementById('note-image-preview').src = '';
+  document.getElementById('note-image-preview').style.display = 'none';
+  renderNotes(); renderHome();
+  showToast('Запись сохранена');
+});
+
+function renderNotes(){
+  notesListEl.innerHTML='';
+  if(state.notes.length===0){ notesListEl.innerHTML='<div class="muted">Записей пока нет</div>'; return; }
+  state.notes.forEach(n=>{
+    const div = document.createElement('div');
+    div.className='p-4 bg-[#0F0F15] rounded-lg flex justify-between items-start gap-4 fade-in';
+    div.innerHTML = `
+      <div class="flex-1">
+        <div class="flex items-center justify-between">
+          <div class="font-semibold">${escapeHtml(n.title)}</div>
+          <div class="text-xs muted">${new Date(n.created).toLocaleString()}</div>
+        </div>
+        <div class="mt-2 text-sm muted">${escapeHtml(n.body.substring(0,280))}</div>
+        ${n.image ? `<img src="${n.image}" style="max-width:120px;max-height:120px;border-radius:8px;margin-top:8px;" />` : ''}
+      </div>
+      <div class="flex flex-col gap-2 text-sm items-end">
+        <button data-id="${n.id}" class="edit-note px-3 py-1 bg-white/5 rounded-lg">Ред.</button>
+        <button data-id="${n.id}" title="Удалить" class="del-note px-3 py-1 rounded-lg trash" style="background:transparent;border:1px solid rgba(255,255,255,0.06)"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L5 7M10 11v6m4-6v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" /></svg></button>
+      </div>`;
+    notesListEl.appendChild(div);
+  });
+  // handlers
+  notesListEl.querySelectorAll('.del-note').forEach(b=>b.addEventListener('click', e=>{
+    const id = e.currentTarget.getAttribute('data-id');
+    noteToDeleteId = id;
+    openModal('note');
+  }));
+  notesListEl.querySelectorAll('.edit-note').forEach(b=>b.addEventListener('click', e=>{
+    const id = e.currentTarget.getAttribute('data-id');
+    const n = state.notes.find(x=>x.id==id);
+    if(n){ noteTitle.value = n.title; noteBody.value = n.body;
+      if(n.image){
+        document.getElementById('note-image-preview').src = n.image;
+        document.getElementById('note-image-preview').style.display = '';
+      } else {
+        document.getElementById('note-image-preview').src = '';
+        document.getElementById('note-image-preview').style.display = 'none';
+      }
+      switchTo('notes'); window.scrollTo({top:0,behavior:'smooth'}); }
+  }));
+}
+// Обработка выбора изображения для заметки
+document.getElementById('chooseNoteImage').addEventListener('click', ()=> document.getElementById('note-image').click());
+document.getElementById('note-image').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('note-image-preview').src = ev.target.result;
+    document.getElementById('note-image-preview').style.display = '';
+    e.target.value = '';
+  };
+  r.readAsDataURL(f);
+});
+
+/* Delete note modal handlers */
+document.getElementById('cancelDeleteNote').addEventListener('click', ()=> closeModal('note'));
+document.getElementById('confirmDeleteNote').addEventListener('click', ()=>{
+  if(!noteToDeleteId) { closeModal('note'); return; }
+  // remove from state with fade
+  const id = noteToDeleteId;
+  state.notes = state.notes.filter(x=>x.id!=id);
+  localStorage.setItem('nn_notes', JSON.stringify(state.notes));
+  renderNotes(); renderHome();
+  closeModal('note');
+  showToast('Запись удалена');
+  noteToDeleteId = null;
+});
+
+/* ==================== Calendar: render + delete event modal ==================== */
+let eventToDeleteId = null;
+function renderCalendar(){
+  const wrap = document.getElementById('calendar-wrap');
+  const now = new Date(); const y = now.getFullYear(); const m = now.getMonth();
+  const first = new Date(y,m,1); const start = (first.getDay()+6)%7; const days = new Date(y,m+1,0).getDate();
+  let html = '';
+  html += `<div class="col-span-7 text-sm muted mb-1"><strong>${now.toLocaleString('ru-RU',{month:'long'})} ${y}</strong></div>`;
+  ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach(d=> html += `<div class="text-xs text-gray-400 text-center">${d}</div>`);
+  for(let i=0;i<start;i++) html += `<div></div>`;
+  for(let d=1; d<=days; d++){
+    const dayDate = new Date(y,m,d);
+    const events = state.events.filter(ev=> new Date(ev.date).toDateString()===dayDate.toDateString());
+    const isToday = new Date().toDateString() === dayDate.toDateString();
+    html += `<div class="p-2 rounded-lg cursor-pointer calendar-day ${isToday ? 'ring-2 ring-[color:var(--accent1)]' : ''} bg-white/3 relative" data-day="${d}"><div class="flex justify-between items-start"><div class="text-sm">${d}</div><div class="text-xs text-[color:var(--accent1)]">${events.length? events.length+'●':''}</div></div>`;
+    // list events inside day for quick actions
+    if(events.length){
+      html += `<div class="mt-2 space-y-1">`;
+      events.forEach(ev=>{
+        html += `<div class="text-xs p-1 bg-black/20 rounded flex justify-between items-center"><div>${escapeHtml(ev.title)}</div><button data-id="${ev.id}" title="Удалить событие" class="del-event trash" style="background:transparent;border:1px solid rgba(255,255,255,0.04);padding:4px;border-radius:6px;"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L5 7M10 11v6m4-6v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" /></svg></button></div>`;
+      });
+      html += `</div>`;
+    }
+    html += `</div>`;
+  }
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('[data-day]').forEach(el=> el.addEventListener('click', ()=>{
+    const d = el.getAttribute('data-day');
+    const dateStr = new Date(new Date().getFullYear(), new Date().getMonth(), d).toISOString();
+    const title = prompt('Название события для '+d+':');
+    if(title){ state.events.push({id:Date.now(),title, date:dateStr}); localStorage.setItem('nn_events_all', JSON.stringify(state.events)); renderCalendar(); renderHome(); renderEventsList(); }
+  }));
+
+  // attach delete handlers for events
+  wrap.querySelectorAll('.del-event').forEach(btn=> btn.addEventListener('click', e=>{
+    e.stopPropagation();
+    const id = e.currentTarget.getAttribute('data-id');
+    eventToDeleteId = id;
+    openModal('event');
+  }));
+
+  renderEventsList();
+}
+function renderEventsList(){
+  const list = document.getElementById('calendar-events-list'); list.innerHTML='';
+  if(state.events.length===0){ list.innerHTML='<div class="muted">Событий нет</div>'; return; }
+  state.events.slice(-8).reverse().forEach(ev=>{
+    list.innerHTML += `<div class="p-3 bg-[#0F0F15] rounded-lg flex justify-between items-center"><div><div class="font-semibold">${escapeHtml(ev.title)}</div><div class="text-xs muted">${(new Date(ev.date)).toLocaleString()}</div></div><div><button data-id="${ev.id}" class="del-event-list trash" title="Удалить событие" style="background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px;border-radius:8px"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L5 7M10 11v6m4-6v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" /></svg></button></div></div>`;
+  });
+  // list delete handlers
+  document.querySelectorAll('.del-event-list').forEach(b=>b.addEventListener('click', e=>{
+    const id = e.currentTarget.getAttribute('data-id');
+    eventToDeleteId = id;
+    openModal('event');
+  }));
+}
+
+/* Delete event modal handlers */
+document.getElementById('cancelDeleteEvent').addEventListener('click', ()=> closeModal('event'));
+document.getElementById('confirmDeleteEvent').addEventListener('click', ()=>{
+  if(!eventToDeleteId) { closeModal('event'); return; }
+  const id = eventToDeleteId;
+  state.events = state.events.filter(x=>x.id!=id);
+  localStorage.setItem('nn_events_all', JSON.stringify(state.events));
+  renderCalendar(); renderHome(); renderEventsList();
+  closeModal('event');
+  showToast('Событие удалено');
+  eventToDeleteId = null;
+});
+
+/* ==================== Finance: add/delete with modal ==================== */
+let finToDeleteId = null;
+document.getElementById('add-fin').addEventListener('click', ()=>{
+  const name = document.getElementById('fin-name').value.trim();
+  const amount = parseFloat(document.getElementById('fin-amount').value);
+  const currency = document.getElementById('fin-currency').value;
+  if(!name || isNaN(amount)){ alert('Введите корректные данные'); return; }
+  state.finances.unshift({id:Date.now(),name,amount,currency}); localStorage.setItem('nn_fin', JSON.stringify(state.finances)); renderFinance(); renderHome();
+  document.getElementById('fin-name').value=''; document.getElementById('fin-amount').value='';
+  showToast('Финансовая запись добавлена');
+});
+function renderFinance(){
+  const list = document.getElementById('fin-list'); list.innerHTML='';
+  if(state.finances.length===0) list.innerHTML='<div class="muted">Трат пока нет</div>';
+  state.finances.forEach(f=>{
+    const id = f.id;
+    const item = document.createElement('div');
+    item.className = 'p-3 bg-[#0F0F15] rounded-lg flex justify-between items-center fade-in';
+    item.innerHTML = `<div><div class="font-medium">${escapeHtml(f.name)}</div><div class="text-xs muted">${f.amount} ${f.currency}</div></div><div><button data-id="${id}" class="del-fin trash" title="Удалить" style="background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px;border-radius:8px"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7L5 7M10 11v6m4-6v6M6 7l1 12a2 2 0 002 2h6a2 2 0 002-2l1-12" /></svg></button></div>`;
+    list.appendChild(item);
+  });
+  list.querySelectorAll('.del-fin').forEach(b=>b.addEventListener('click', e=>{
+    const id = e.currentTarget.getAttribute('data-id');
+    finToDeleteId = id;
+    openModal('fin');
+  }));
+
+  let sumKZT=0; state.finances.forEach(f=>{ if(f.currency==='KZT') sumKZT+=Number(f.amount); if(f.currency==='USD') sumKZT+=Number(f.amount)*state.rates.USD; if(f.currency==='RUB') sumKZT+=Number(f.amount)*state.rates.RUB; });
+  document.getElementById('fin-totals').innerHTML = `<div class="p-3 bg-[#0F0F15] rounded-lg">Итого: <strong>${Math.round(sumKZT)}</strong> KZT • ${(sumKZT/state.rates.USD).toFixed(2)} USD • ${(sumKZT/state.rates.RUB).toFixed(2)} RUB</div>`;
+}
+
+/* Delete finance modal handlers */
+document.getElementById('cancelDeleteFin').addEventListener('click', ()=> closeModal('fin'));
+document.getElementById('confirmDeleteFin').addEventListener('click', ()=>{
+  if(!finToDeleteId) { closeModal('fin'); return; }
+  const id = finToDeleteId;
+  state.finances = state.finances.filter(x=>x.id!=id);
+  localStorage.setItem('nn_fin', JSON.stringify(state.finances));
+  renderFinance(); renderHome();
+  closeModal('fin');
+  showToast('Финансовая запись удалена');
+  finToDeleteId = null;
+});
+
+/* ==================== Settings: avatar/name/email/password/theme/save/delete/logout ==================== */
+document.getElementById('chooseAvatar').addEventListener('click', ()=> document.getElementById('avatarFile').click());
+document.getElementById('avatarFile').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('avatarPreviewImg').src = ev.target.result;
+    document.getElementById('profileAvatar').src = ev.target.result;
+    document.getElementById('top-avatar').src = ev.target.result;
+    state.user.avatar = ev.target.result;
+    localStorage.setItem('nn_user', JSON.stringify(state.user));
+    e.target.value = '';
+  };
+  r.readAsDataURL(f);
+});
+
+document.getElementById('saveProfile').addEventListener('click', ()=>{
+  const name = document.getElementById('set-name').value.trim();
+  const email = document.getElementById('set-email').value.trim();
+  const password = document.getElementById('set-password').value;
+  if(name) state.user.name = name;
+  state.user.email = email;
+  state.user.password = password;
+  localStorage.setItem('nn_user', JSON.stringify(state.user));
+  initUser(); showToast('Профиль сохранён');
+});
+
+document.getElementById('downgrade').addEventListener('click', ()=>{
+  if(!confirm('Удалить аккаунт и все локальные данные?')) return;
+  // Анимация удаления аватара
+  const img = document.getElementById('avatarPreviewImg');
+  img.style.opacity = '0';
+  setTimeout(()=>{
+    img.src = 'https://via.placeholder.com/80';
+    img.style.opacity = '1';
+    document.getElementById('profileAvatar').src = 'https://via.placeholder.com/80';
+    document.getElementById('top-avatar').src = 'https://via.placeholder.com/80';
+    state.user.avatar = '';
+    localStorage.setItem('nn_user', JSON.stringify(state.user));
+    ['nn_user','nn_auth','nn_notes','nn_events_all','nn_fin','nn_sub','nn_theme'].forEach(k=>localStorage.removeItem(k));
+    showToast('Данные удалены — возвращаем на главную');
+    setTimeout(()=> window.location.href='index.html', 700);
+  }, 250);
+});
+
+// Logout modal handlers
+document.getElementById('openLogoutModal').addEventListener('click', ()=> document.getElementById('logoutModal').classList.remove('hidden'));
+document.getElementById('cancelLogout').addEventListener('click', ()=> document.getElementById('logoutModal').classList.add('hidden'));
+document.getElementById('confirmLogout').addEventListener('click', ()=>{
+  localStorage.removeItem('nn_auth');
+  document.getElementById('logoutModal').classList.add('hidden');
+  window.location.href = 'index.html';
+});
+
+/* ==================== Search (notes/events/finances) ==================== */
+const searchInput = document.getElementById('quickSearch');
+const searchBtn = document.getElementById('searchBtn');
+const resultsBox = document.getElementById('searchResults');
+
+function performSearch(query){
+  query = (query||'').trim().toLowerCase();
+  resultsBox.innerHTML = '';
+  if(!query){ resultsBox.classList.add('hidden'); return; }
+  const hits = [];
+
+  // notes
+  state.notes.forEach(n=>{
+    if((n.title||'').toLowerCase().includes(query) || (n.body||'').toLowerCase().includes(query)){
+      hits.push({type:'note',title:n.title,subtitle:n.body.substring(0,80),id:n.id});
+    }
+  });
+  // events
+  state.events.forEach(ev=>{
+    if((ev.title||'').toLowerCase().includes(query)){
+      hits.push({type:'event',title:ev.title,subtitle:new Date(ev.date).toLocaleString(),id:ev.id});
+    }
+  });
+  // finances
+  state.finances.forEach(f=>{
+    if((f.name||'').toLowerCase().includes(query)){
+      hits.push({type:'finance',title:f.name,subtitle: f.amount+' '+f.currency, id:f.id});
+    }
+  });
+
+  if(hits.length===0){ resultsBox.innerHTML = '<div class="muted p-2 text-sm">Ничего не найдено</div>'; resultsBox.classList.remove('hidden'); return; }
+
+  hits.slice(0,30).forEach(h=>{
+    const row = document.createElement('div');
+    row.className = 'p-2 hover:bg-white/5 rounded cursor-pointer';
+    row.innerHTML = `<div class="text-sm font-semibold">${escapeHtml(h.title)}</div><div class="text-xs muted">${escapeHtml(h.subtitle)}</div><div class="text-xs muted">Тип: ${h.type}</div>`;
+    row.addEventListener('click', ()=>{
+      if(h.type==='note'){ switchTo('notes'); setTimeout(()=> jumpToNote(h.id), 80); }
+      if(h.type==='event'){ switchTo('calendar'); /* optionally highlight */ }
+      if(h.type==='finance'){ switchTo('finance'); /* optionally scroll */ }
+      resultsBox.classList.add('hidden');
+    });
+    resultsBox.appendChild(row);
+  });
+  resultsBox.classList.remove('hidden');
+}
+
+searchBtn.addEventListener('click', ()=> performSearch(searchInput.value));
+searchInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); performSearch(searchInput.value); } });
+
+function jumpToNote(id){
+  const n = state.notes.find(x=>x.id==id);
+  if(n){ noteTitle.value = n.title; noteBody.value = n.body; window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+/* hide results on outside click */
+document.addEventListener('click', (e)=>{
+  const q = document.getElementById('quickSearch');
+  if(!q.contains(e.target) && !resultsBox.contains(e.target) && !document.getElementById('searchBtn').contains(e.target)){
+    resultsBox.classList.add('hidden');
+  }
+});
+
+/* ==================== Theme switching (dark, neon, light) ==================== */
+const themeBtns = document.querySelectorAll('.theme-btn');
+themeBtns.forEach(b=>b.addEventListener('click', ()=> {
+  const t = b.getAttribute('data-theme');
+  saveTheme(t); applyTheme(t); showToast('Тема изменена');
+}));
+
+function saveTheme(t){ localStorage.setItem('nn_theme', t); }
+function getSavedTheme(){ return localStorage.getItem('nn_theme') || 'dark'; }
+function applyTheme(t){
+  if(t==='neon'){
+    document.documentElement.style.setProperty('--bg','#08070b');
+    document.documentElement.style.setProperty('--card','#0F1724');
+    document.documentElement.style.setProperty('--muted','#9AA1A6');
+    document.documentElement.style.setProperty('--accent1','#22d3ee');
+    document.documentElement.style.setProperty('--accent2','#7c3aed');
+    document.body.style.background = 'var(--bg)';
+    document.body.style.color = '#fff';
+  } else if(t==='light'){
+    document.documentElement.style.setProperty('--bg', 'var(--light-bg)');
+    document.documentElement.style.setProperty('--card', '#ffffff');
+    document.documentElement.style.setProperty('--muted', '#6b7280');
+    document.documentElement.style.setProperty('--accent1','#06b6d4');
+    document.documentElement.style.setProperty('--accent2','#7c3aed');
+    document.body.style.background = 'var(--bg)';
+    document.body.style.color = 'var(--light-text)';
+  } else { // dark
+    document.documentElement.style.setProperty('--bg','#0B0B0F');
+    document.documentElement.style.setProperty('--card','#0F1724');
+    document.documentElement.style.setProperty('--muted','#9AA1A6');
+    document.documentElement.style.setProperty('--accent1','#22d3ee');
+    document.documentElement.style.setProperty('--accent2','#7c3aed');
+    document.body.style.background = 'var(--bg)';
+    document.body.style.color = '#fff';
+  }
+}
+
+/* ==================== Quick bindings & initial renders ==================== */
+document.getElementById('openNotesBtn').addEventListener('click', ()=> switchTo('notes'));
+
+document.getElementById('add-event-btn').addEventListener('click', ()=> { const d = prompt('Название события:'); if(d){ state.events.push({id:Date.now(),title:d, date: new Date().toISOString()}); localStorage.setItem('nn_events_all', JSON.stringify(state.events)); renderCalendar(); renderHome(); showToast('Событие добавлено'); } });
+
+document.getElementById('chooseAvatar').addEventListener('click', ()=> document.getElementById('avatarFile').click());
+document.getElementById('quickSearch').addEventListener('focus', ()=> document.getElementById('searchResults').classList.remove('hidden'));
+
+renderHome(); renderNotes(); renderFinance(); renderCalendar();
+
+/* ==================== Modal open/close helpers ==================== */
+function openModal(type){
+  if(type==='note') document.getElementById('deleteNoteModal').classList.remove('hidden');
+  if(type==='fin') document.getElementById('deleteFinModal').classList.remove('hidden');
+  if(type==='event') document.getElementById('deleteEventModal').classList.remove('hidden');
+}
+function closeModal(type){
+  if(type==='note') document.getElementById('deleteNoteModal').classList.add('hidden');
+  if(type==='fin') document.getElementById('deleteFinModal').classList.add('hidden');
+  if(type==='event') document.getElementById('deleteEventModal').classList.add('hidden');
+}
+
+/* ==================== Toast notifications ==================== */
+function showToast(msg, duration=2500){
+  const area = document.getElementById('toastArea');
+  const el = document.createElement('div');
+  el.className = 'p-3 rounded-lg glass card-shadow scale-in';
+  el.innerHTML = `<div class="font-medium">${escapeHtml(msg)}</div>`;
+  area.appendChild(el);
+  setTimeout(()=> {
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0'; el.style.transform = 'translateY(8px)';
+    setTimeout(()=> el.remove(), 350);
+  }, duration);
+}
+
+/* ==================== Utilities ==================== */
+function escapeHtml(str){ if(!str && str !== 0) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+document.getElementById('add-event-btn').addEventListener('click', ()=>{
+  const title = prompt('Название нового события:');
+  if(title){
+    const dateStr = new Date().toISOString();
+    state.events.push({id:Date.now(), title, date: dateStr});
+    localStorage.setItem('nn_events_all', JSON.stringify(state.events));
+    renderCalendar(); renderHome(); renderEventsList();
+    showToast('Событие добавлено');
+  }
+});
+
+/* ==================== Home render ==================== */
+function renderHome(){
+  // last note
+  const lastNote = state.notes[0];
+  document.getElementById('home-last-title').textContent = lastNote?.title || '—';
+  document.getElementById('home-last-body').textContent = lastNote?.body || '—';
+  document.getElementById('home-last-date').textContent = lastNote ? new Date(lastNote.created).toLocaleString() : '—';
+  
+  // upcoming events
+  const upcoming = state.events.filter(ev=> new Date(ev.date)>=new Date()).sort((a,b)=> new Date(a.date)-new Date(b.date)).slice(0,5);
+  const upcomingWrap = document.getElementById('upcoming-events');
+  upcomingWrap.innerHTML = upcoming.length ? upcoming.map(ev=>`<div class="p-2 bg-[#0F0F15] rounded text-sm">${escapeHtml(ev.title)} <span class="text-xs muted">${new Date(ev.date).toLocaleDateString()}</span></div>`).join('') : '<div class="muted">Нет ближайших событий</div>';
+  
+  // recent notes
+  const recentWrap = document.getElementById('recent-notes');
+  recentWrap.innerHTML = state.notes.slice(0,5).map(n=>`<div class="p-2 bg-[#0F0F15] rounded">${escapeHtml(n.title)}</div>`).join('') || '<div class="muted">Нет заметок</div>';
+
+  // finances sum
+  renderFinance();
+}
+
+/* ==================== Utilities ==================== */
+function openModal(type){
+  if(type==='note') document.getElementById('deleteNoteModal').classList.remove('hidden');
+  if(type==='event') document.getElementById('deleteEventModal').classList.remove('hidden');
+  if(type==='fin') document.getElementById('deleteFinModal').classList.remove('hidden');
+}
+
+function closeModal(type){
+  if(type==='note') document.getElementById('deleteNoteModal').classList.add('hidden');
+  if(type==='event') document.getElementById('deleteEventModal').classList.add('hidden');
+  if(type==='fin') document.getElementById('deleteFinModal').classList.add('hidden');
+}
+
+function escapeHtml(text){
+  return text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function showToast(msg,duration=2000){
+  const toast = document.createElement('div');
+  toast.className='p-3 mb-2 bg-white/10 rounded shadow text-sm';
+  toast.textContent=msg;
+  document.getElementById('toastArea').appendChild(toast);
+  setTimeout(()=> toast.remove(), duration);
+}
+
+
+</script>
+</body>
+</html>
