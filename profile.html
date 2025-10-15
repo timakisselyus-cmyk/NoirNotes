@@ -92,6 +92,32 @@
       }
     }
   </style>
+  <script>
+    // Переключение вкладок для мобильной навигации
+    function switchTo(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      const tabEl = document.getElementById('tab-' + tab);
+      if(tabEl) tabEl.style.display = '';
+      // Активная кнопка
+      document.querySelectorAll('#mobile-nav button').forEach(btn => btn.classList.remove('bg-[#22223a]'));
+      const btn = document.querySelector(`#mobile-nav button[onclick*="${tab}"]`);
+      if(btn) btn.classList.add('bg-[#22223a]');
+    }
+    // Показывать первую вкладку по умолчанию на мобильных
+    window.addEventListener('DOMContentLoaded', () => {
+      if(window.innerWidth <= 640) {
+        switchTo('home');
+      }
+    });
+  </script>
+  <!-- Мобильная нижняя панель навигации -->
+  <nav id="mobile-nav" style="display:none;position:fixed;bottom:0;left:0;width:100vw;height:56px;z-index:100;background:rgba(15,23,36,0.98);border-top:1px solid #222;box-shadow:0 -2px 12px rgba(0,0,0,0.12);" class="flex justify-between items-center px-2">
+    <button onclick="switchTo('home')" style="flex:1" class="flex flex-col items-center justify-center py-1 text-xs text-white"><span style="font-size:1.3em">🏠</span>Главная</button>
+    <button onclick="switchTo('notes')" style="flex:1" class="flex flex-col items-center justify-center py-1 text-xs text-white"><span style="font-size:1.3em">✍️</span>Дневники</button>
+    <button onclick="switchTo('calendar')" style="flex:1" class="flex flex-col items-center justify-center py-1 text-xs text-white"><span style="font-size:1.3em">📅</span>Календарь</button>
+    <button onclick="switchTo('finance')" style="flex:1" class="flex flex-col items-center justify-center py-1 text-xs text-white"><span style="font-size:1.3em">💰</span>Финансы</button>
+    <button onclick="switchTo('settings')" style="flex:1" class="flex flex-col items-center justify-center py-1 text-xs text-white"><span style="font-size:1.3em">👤</span>Профиль</button>
+  </nav>
 </head>
 <body class="antialiased min-h-screen theme-transition">
 
@@ -180,7 +206,7 @@
       <section class="col-span-12 md:col-span-9 lg:col-span-10">
 
         <!-- HOME -->
-        <div id="tab-home" class="tab-content">
+  <div id="tab-home" class="tab-content">
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
             <div class="glass p-5 rounded-2xl">
               <div class="flex items-center justify-between">
@@ -223,7 +249,7 @@
         </div>
 
         <!-- NOTES -->
-        <div id="tab-notes" class="tab-content hidden">
+  <div id="tab-notes" class="tab-content" style="display:none">
           <div class="flex flex-col lg:flex-row gap-6">
             <div class="flex-1">
               <div class="glass p-4 rounded-2xl mb-4">
@@ -253,7 +279,7 @@
         </div>
 
         <!-- CALENDAR -->
-        <div id="tab-calendar" class="tab-content hidden">
+  <div id="tab-calendar" class="tab-content" style="display:none">
           <div class="glass p-4 rounded-2xl mb-4">
             <div class="flex items-center justify-between">
               <h3 class="font-semibold">Календарь</h3>
@@ -268,7 +294,7 @@
         </div>
 
         <!-- FINANCE -->
-        <div id="tab-finance" class="tab-content hidden">
+  <div id="tab-finance" class="tab-content" style="display:none">
           <div class="glass p-4 rounded-2xl">
             <h3 class="font-semibold">Финансы — быстрый ввод</h3>
             <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -289,7 +315,7 @@
         </div>
 
         <!-- SETTINGS -->
-        <div id="tab-settings" class="tab-content hidden">
+  <div id="tab-settings" class="tab-content" style="display:none">
           <div class="glass p-6 rounded-2xl">
             <h3 class="font-semibold mb-3">Профиль</h3>
 
